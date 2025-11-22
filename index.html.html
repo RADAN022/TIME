@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>فرم ثبت فعالیت - STAFFS RADAN</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vazirmatn@latest/font-face.css">
+  <style>
+    body {
+      font-family: Vazirmatn, Tahoma, sans-serif;
+      background: linear-gradient(135deg, #1e1e2f 0%, #121218 100%);
+      color: #f5f5f5;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 700px; margin: auto; }
+    .form-box {
+      background: rgba(30,30,30,0.85);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .header { text-align: center; margin-bottom: 2rem; }
+    .logo { font-size: 2rem; }
+    h1 { color: #2196f3; margin: 0.5rem 0; }
+    label { display: block; margin: 0.5rem 0; color: #2196f3; font-weight: bold; }
+    input, select {
+      width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #444;
+      background: rgba(20,20,20,0.7); color: #fff;
+    }
+    button {
+      margin-top: 1rem; width: 100%; padding: 1rem;
+      border: none; border-radius: 8px;
+      background: linear-gradient(135deg,#2196f3,#1976d2);
+      color: #fff; font-size: 1.1rem; font-weight: bold; cursor: pointer;
+    }
+    button:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-box">
+      <div class="header">
+        <div class="logo">📝</div>
+        <h1>فرم ثبت زمان فعالیت ادمینی شهر رادان 🕒</h1>
+      </div>
+      <form id="activityForm">
+        <label for="icname">🔹 (IC)نام شما داخل سرور:</label>
+        <input id="icname" name="icname" type="text" required>
+
+        <label for="realname">🔸 (OOC)نام واقعی:</label>
+        <input id="realname" name="realname" type="text" required>
+
+        <label for="role">🔹 مسئولیت:</label>
+        <select id="role" name="role" required>
+          <option value="">انتخاب کنید...</option>
+          <option>...</option>
+          <option>SUPERVISOR</option>
+          <option>Manegers</option>
+          <option>HEADADMIN</option>
+          <option>Executive Admin</option>
+		  <option>HEADSUPOORT</option>
+		  <option>SINIORADMIN</option>
+		  <option>Admin</option>
+		  <option>HELPERS</option>
+        </select>
+
+        <label for="start">🔸 از ساعت:</label>
+        <input id="start" name="start" type="time" required>
+
+        <label for="end">🔹 تا ساعت:</label>
+        <input id="end" name="end" type="time" required>
+
+        <button type="submit">📨 ثبت فعالیت</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('activityForm');
+    const WEBHOOK = "https://discord.com/api/webhooks/1441788152984375438/JNyU31GLtUjRbrufozj8dk1AM8Es2bH9m0Bf4Ud7Ffwyb5FYvGUkvTDOqZYgSnhT7_FM";
+
+    function calcHours(start, end) {
+      const [sh, sm] = start.split(":").map(Number);
+      const [eh, em] = end.split(":").map(Number);
+      let diff = (eh*60+em) - (sh*60+sm);
+      if (diff < 0) diff += 24*60; // در صورتی که ساعت عبور از نیمه شب شود
+      return (diff/60).toFixed(2);
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = {
+        icname: form.icname.value,
+        realname: form.realname.value,
+        role: form.role.value,
+        start: form.start.value,
+        end: form.end.value,
+        total: calcHours(form.start.value, form.end.value) + " ساعت"
+      };
+
+      const content = `
+**ثبت فعالیت جدید 📝**
+
+**نام شما داخل سرور:** ${data.icname}
+**نام واقعی:** ${data.realname}
+**مسئولیت:** ${data.role}
+**از ساعت:** ${data.start}
+**تا ساعت:** ${data.end}
+**جمع ساعت در سرور:** ${data.total}
+      `;
+
+      try {
+        await fetch(WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+        alert('✅ فعالیت شما با موفقیت ثبت شد');
+        form.reset();
+      } catch (err) {
+        alert('⚠️ خطا در ارسال، دوباره تلاش کنید.');
+      }
+    });
+  </script>
+</body>
+</html>
